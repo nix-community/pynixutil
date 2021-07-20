@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Utility functions for working with Nix in Python"
 authors = ["adisbladis <adam.hose@tweag.io>"]
 license = "MIT"
+homepage = "https://github.com/tweag/pynix"
 
 [tool.poetry.dependencies]
 python = "^3.8"

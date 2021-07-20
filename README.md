@@ -21,7 +21,7 @@ d = pynixutil.drvparse(open("/nix/store/33cbakl9bg880apzjyvwwgkwsn8zzpcb-hello-2
 print(d)
 ```
 
-Returns a structure like
+Returns a structure like:
 ```
 Derivation(
   outputs={
@@ -81,3 +81,4 @@ Derivation(
   }
 )
 ```
+This roughly matches the data returned by `nix show-derivation`, but with more pythonic attribute names.

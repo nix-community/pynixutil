@@ -20,6 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from dataclasses import dataclass
+from dacite import from_dict
+from typing import (
+    Optional,
+    Dict,
+    List,
+)
 import typing
 import base64
 import ast
@@ -32,15 +39,34 @@ __all__ = (
 )
 
 
-_DRV_FIELDS: typing.List[str] = [
-    "outputs",
-    "inputDrvs",
-    "inputSrcs",
-    "platform",
-    "builder",
-    "args",
-    "env",
-]
+@dataclass
+class DerivationOutput:
+    path: str
+    hashAlgo: Optional[str]
+    hash: Optional[str]
+
+
+@dataclass
+class Derivation:
+    outputs: Dict[str, DerivationOutput]
+
+    # drv -> outputs
+    inputDrvs: Dict[str, List[str]]
+
+    inputSrcs: List[str]
+
+    system: str
+
+    builder: str
+
+    args: List[str]
+
+    env: Dict[str, str]
+
+    # This was renamed in Nix 2.4
+    @property
+    def platform(self) -> str:
+        return self.system
 
 
 _B32_ORIG = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
@@ -57,7 +83,7 @@ def b32encode(b: bytes) -> bytes:
     return base64.b32encode(b).translate(_B32_ENC_TRANS)
 
 
-def drvparse(drv: str) -> typing.Dict:
+def drvparse(drv: str) -> Derivation:
     """
     Parse a derivation into a dict using the same format as nix show-derivation
     """
@@ -75,7 +101,7 @@ def drvparse(drv: str) -> typing.Dict:
             raise ValueError(node)
 
     ret = {}
-    for field, node in zip(_DRV_FIELDS, parsed.body[0].value.args):  # type: ignore
+    for field, node in zip(Derivation.__dataclass_fields__.keys(), parsed.body[0].value.args):  # type: ignore
         value = parse_node(node)
         if field == "env":
             value = dict(value)
@@ -89,8 +115,9 @@ def drvparse(drv: str) -> typing.Dict:
                     v["hashAlgo"] = hash_algo
                 if hash_hex:
                     v["hash"] = hash_hex
-                d[output] = v
+                d[output] = from_dict(data_class=DerivationOutput, data=v)
             value = d
 
         ret[field] = value
-    return ret
+
+    return from_dict(data_class=Derivation, data=ret)

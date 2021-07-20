@@ -27,12 +27,32 @@ def assert_deepequals(a, b, _path=None):
             assert_deepequals(*vals, _path=p)
 
     elif isinstance(a, dict):
-        if not isinstance(b, dict):
-            raise err
 
-        for key in set(a.keys()) | set(b.keys()):
+        try:
+            b_keys = b.keys()
+        except AttributeError:
+            b_keys = b.__dataclass_fields__
+
+        for key in set(a.keys()) | set(b_keys):
             p = make_path(key)
-            assert_deepequals(a[key], b[key], _path=p)
+
+            try:
+                a_value = a[key]
+            except KeyError:
+                # Take backwards compat into account
+                if key == "system":
+                    a_value = a["platform"]
+                elif key == "platform":
+                    a_value = a["system"]
+                else:
+                    a_value = None
+
+            try:
+                b_value = b[key]
+            except (TypeError, KeyError):
+                b_value = getattr(b, key)
+
+            assert_deepequals(a_value, b_value, _path=p)
 
     elif a == b:
         return

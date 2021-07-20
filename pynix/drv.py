@@ -40,7 +40,7 @@ __all__ = (
 @dataclass
 class DerivationOutput:
     path: str
-    hashAlgo: Optional[str]
+    hash_algo: Optional[str]
     hash: Optional[str]
 
 
@@ -49,9 +49,9 @@ class Derivation:
     outputs: Dict[str, DerivationOutput]
 
     # drv -> outputs
-    inputDrvs: Dict[str, List[str]]
+    input_drvs: Dict[str, List[str]]
 
-    inputSrcs: List[str]
+    input_srcs: List[str]
 
     system: str
 
@@ -89,14 +89,14 @@ def drvparse(drv: str) -> Derivation:
         value = parse_node(node)
         if field == "env":
             value = dict(value)
-        elif field == "inputDrvs":
+        elif field == "input_drvs":
             value = {k: v for k, v in value}
         elif field == "outputs":
             d = {}
             for output, store_path, hash_algo, hash_hex in value:
                 v = {"path": store_path}
                 if hash_algo:
-                    v["hashAlgo"] = hash_algo
+                    v["hash_algo"] = hash_algo
                 if hash_hex:
                     v["hash"] = hash_hex
                 d[output] = from_dict(data_class=DerivationOutput, data=v)

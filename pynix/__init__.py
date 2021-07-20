@@ -32,7 +32,6 @@ from pynix.base32 import (
 __all__ = (
     "b32decode",
     "b32encode",
-
     "Derivation",
     "DerivationOutput",
     "drvparse",

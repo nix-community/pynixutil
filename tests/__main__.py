@@ -5,9 +5,14 @@ import typing
 import pynix
 import json
 import os
+import re
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+
+
+def camel_to_snake_case(s: str) -> str:
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
 def assert_deepequals(a, b, _path=None):
@@ -28,12 +33,7 @@ def assert_deepequals(a, b, _path=None):
 
     elif isinstance(a, dict):
 
-        try:
-            b_keys = b.keys()
-        except AttributeError:
-            b_keys = b.__dataclass_fields__
-
-        for key in set(a.keys()) | set(b_keys):
+        for key in list(a.keys()):
             p = make_path(key)
 
             try:
@@ -50,7 +50,10 @@ def assert_deepequals(a, b, _path=None):
             try:
                 b_value = b[key]
             except (TypeError, KeyError):
-                b_value = getattr(b, key)
+                try:
+                    b_value = getattr(b, key)
+                except AttributeError:
+                    b_value = getattr(b, camel_to_snake_case(key))
 
             assert_deepequals(a_value, b_value, _path=p)
 

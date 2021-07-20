@@ -11,6 +11,7 @@ dacite = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
+pytest = "^6.2.4"
 
 
 [build-system]

@@ -1,7 +1,7 @@
 import subprocess
-import unittest
 import os.path
 import typing
+import pytest
 import pynix
 import json
 import os
@@ -88,29 +88,18 @@ def drvparse_pynix(drv_path: str) -> typing.Dict:
         return pynix.drvparse(f.read())
 
 
-class DrvParseTest(unittest.TestCase):
-    def test_parse(self):
-        """Test comparing parsing drv's between nix & pynix"""
-
-        drvs = [
-            os.path.join(FIXTURES_DIR, drv_path)
-            for drv_path in os.listdir(FIXTURES_DIR)
-        ]
-        self.assertEqual(len(drvs), 4)
-
-        for i, d in enumerate(drvs):
-            with self.subTest(drv=d):
-                assert_deepequals(drvparse_nix(d), drvparse_pynix(d))
+def get_fixtures() -> typing.List[str]:
+    return [
+        os.path.join(FIXTURES_DIR, drv_path) for drv_path in os.listdir(FIXTURES_DIR)
+    ]
 
 
-class B32Test(unittest.TestCase):
-    def test_decode(self):
-        b = pynix.b32decode("v5sv61sszx301i0x6xysaqzla09nksnd")
-        self.assertEqual(b, b"\xd9u\xb3\x07Z\xffF\x00\xc4\x1d7}\xa5c\xf4P\x13i\xea\xcd")
-
-    def test_encode(self):
-        b = pynix.b32encode(b"\xd9u\xb3\x07Z\xffF\x00\xc4\x1d7}\xa5c\xf4P\x13i\xea\xcd")
-        self.assertEqual(b, b"v5sv61sszx301i0x6xysaqzla09nksnd")
+def test_parameters():
+    drvs = get_fixtures()
+    assert len(drvs) == 4
 
 
-unittest.main()
+@pytest.mark.parametrize("drv", get_fixtures())
+def test_parse(drv):
+    """Test comparing parsing drv '%s' between nix & pynix""" % drv
+    assert_deepequals(drvparse_nix(drv), drvparse_pynix(drv))

@@ -15,8 +15,11 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
 
+    - name: shell
+      run: nix-shell --run ""
+
     - name: format
-      run: nix-shell --run "black --quiet --check ."
+      run: nix-shell --run "black --check ."
 
     - name: tests
-      run: nix-shell --run "python -m tests"
+      run: nix-shell --run "pytest"

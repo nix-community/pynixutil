@@ -1,8 +1,8 @@
 import subprocess
+import pynixutil
 import os.path
 import typing
 import pytest
-import pynix
 import json
 import os
 import re
@@ -82,10 +82,10 @@ def drvparse_nix(drv_path: str) -> typing.Dict:
     raise ValueError()
 
 
-def drvparse_pynix(drv_path: str) -> typing.Dict:
-    """Parse a drv using pynix"""
+def drvparse_pynixutil(drv_path: str) -> typing.Dict:
+    """Parse a drv using pynixutil"""
     with open(drv_path) as f:
-        return pynix.drvparse(f.read())
+        return pynixutil.drvparse(f.read())
 
 
 def get_fixtures() -> typing.List[str]:
@@ -101,5 +101,5 @@ def test_parameters():
 
 @pytest.mark.parametrize("drv", get_fixtures())
 def test_parse(drv):
-    """Test comparing parsing drv '%s' between nix & pynix""" % drv
-    assert_deepequals(drvparse_nix(drv), drvparse_pynix(drv))
+    """Test comparing parsing drv '%s' between nix & pynixutil""" % drv
+    assert_deepequals(drvparse_nix(drv), drvparse_pynixutil(drv))

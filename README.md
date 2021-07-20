@@ -1,23 +1,23 @@
-## Pynix - Utility functions for working with data from Nix in Python
+## Pynixutil - Utility functions for working with data from Nix in Python
 
 ### Examples
 
 #### Base32 encoding/decoding
 ``` python
-import pynix
+import pynixutil
 
 input = "v5sv61sszx301i0x6xysaqzla09nksnd"
-b = pynix.b32decode(input)
-output = pynix.b32encode(b)
+b = pynixutil.b32decode(input)
+output = pynixutil.b32encode(b)
 assert input == output
 ```
 
 #### Derivation parsing
 ``` python
-import pynix
+import pynixutil
 
 # Returns a dict with the same shape as nix show-derivation uses
-d = pynix.drvparse(open("/nix/store/33cbakl9bg880apzjyvwwgkwsn8zzpcb-hello-2.10.drv").read())
+d = pynixutil.drvparse(open("/nix/store/33cbakl9bg880apzjyvwwgkwsn8zzpcb-hello-2.10.drv").read())
 print(d)
 ```
 

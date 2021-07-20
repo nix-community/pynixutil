@@ -1,0 +1,107 @@
+# MIT License
+
+# Copyright (c) 2021 Tweag IO
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+from dataclasses import dataclass
+from dacite import from_dict
+from typing import (
+    Optional,
+    Dict,
+    List,
+)
+import ast
+
+
+__all__ = (
+    "Derivation",
+    "DerivationOutput",
+    "drvparse",
+)
+
+
+@dataclass
+class DerivationOutput:
+    path: str
+    hashAlgo: Optional[str]
+    hash: Optional[str]
+
+
+@dataclass
+class Derivation:
+    outputs: Dict[str, DerivationOutput]
+
+    # drv -> outputs
+    inputDrvs: Dict[str, List[str]]
+
+    inputSrcs: List[str]
+
+    system: str
+
+    builder: str
+
+    args: List[str]
+
+    env: Dict[str, str]
+
+    # This was renamed in Nix 2.4
+    @property
+    def platform(self) -> str:
+        return self.system
+
+
+def drvparse(drv: str) -> Derivation:
+    """
+    Parse a derivation into a dict using a similar format as nix show-derivation
+    """
+
+    parsed = ast.parse(drv)
+
+    def parse_node(node):
+        if isinstance(node, ast.List):
+            return [parse_node(n) for n in node.elts]
+        elif isinstance(node, ast.Constant):
+            return node.value
+        elif isinstance(node, ast.Tuple):
+            return tuple(parse_node(n) for n in node.elts)
+        else:
+            raise ValueError(node)
+
+    ret = {}
+    for field, node in zip(Derivation.__dataclass_fields__.keys(), parsed.body[0].value.args):  # type: ignore
+        value = parse_node(node)
+        if field == "env":
+            value = dict(value)
+        elif field == "inputDrvs":
+            value = {k: v for k, v in value}
+        elif field == "outputs":
+            d = {}
+            for output, store_path, hash_algo, hash_hex in value:
+                v = {"path": store_path}
+                if hash_algo:
+                    v["hashAlgo"] = hash_algo
+                if hash_hex:
+                    v["hash"] = hash_hex
+                d[output] = from_dict(data_class=DerivationOutput, data=v)
+            value = d
+
+        ret[field] = value
+
+    return from_dict(data_class=Derivation, data=ret)

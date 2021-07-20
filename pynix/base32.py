@@ -19,21 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from pynix.drv import (
-    Derivation,
-    DerivationOutput,
-    drvparse,
-)
-from pynix.base32 import (
-    b32decode,
-    b32encode,
-)
 
-__all__ = (
-    "b32decode",
-    "b32encode",
+import base64
 
-    "Derivation",
-    "DerivationOutput",
-    "drvparse",
-)
+
+_B32_ORIG = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+_B32_NIX = "0123456789abcdfghijklmnpqrsvwxyz"
+_B32_DEC_TRANS = str.maketrans(_B32_NIX, _B32_ORIG)
+_B32_ENC_TRANS = bytes.maketrans(_B32_ORIG.encode(), _B32_NIX.encode())
+
+
+def b32decode(s: str, **kwargs) -> bytes:
+    return base64.b32decode(s.translate(_B32_DEC_TRANS), **kwargs)
+
+
+def b32encode(b: bytes) -> bytes:
+    return base64.b32encode(b).translate(_B32_ENC_TRANS)

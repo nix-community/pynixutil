@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from dataclasses import dataclass
-from dacite import from_dict
 from typing import (
     Optional,
     Dict,
@@ -37,14 +36,14 @@ __all__ = (
 )
 
 
-@dataclass
+@dataclass(init=False)
 class DerivationOutput:
     path: str
     hash_algo: Optional[str]
     hash: Optional[str]
 
 
-@dataclass
+@dataclass(init=False)
 class Derivation:
     outputs: Dict[str, DerivationOutput]
 
@@ -67,12 +66,12 @@ class Derivation:
         return self.system
 
 
-def drvparse(drv: str) -> Derivation:
+def drvparse(drv_path: str) -> Derivation:
     """
     Parse a derivation into a dict using a similar format as nix show-derivation
     """
 
-    parsed = ast.parse(drv)
+    parsed = ast.parse(drv_path)
 
     def parse_node(node):
         if isinstance(node, ast.List):
@@ -84,7 +83,7 @@ def drvparse(drv: str) -> Derivation:
         else:
             raise ValueError(node)
 
-    ret = {}
+    drv = Derivation()
     for field, node in zip(Derivation.__dataclass_fields__.keys(), parsed.body[0].value.args):  # type: ignore
         value = parse_node(node)
         if field == "env":
@@ -94,14 +93,13 @@ def drvparse(drv: str) -> Derivation:
         elif field == "outputs":
             d = {}
             for output, store_path, hash_algo, hash_hex in value:
-                v = {"path": store_path}
-                if hash_algo:
-                    v["hash_algo"] = hash_algo
-                if hash_hex:
-                    v["hash"] = hash_hex
-                d[output] = from_dict(data_class=DerivationOutput, data=v)
+                drv_output = DerivationOutput()
+                drv_output.path = store_path
+                drv_output.hash_algo = hash_algo
+                drv_output.hash = hash_hex
+                d[output] = drv_output
             value = d
 
-        ret[field] = value
+        setattr(drv, field, value)
 
-    return from_dict(data_class=Derivation, data=ret)
+    return drv

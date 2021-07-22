@@ -6,5 +6,9 @@ let
 
 in
 pkgs.mkShell {
-  buildInputs = [ pkgs.poetry pythonEnv ];
+  buildInputs = [
+    pkgs.poetry
+    pythonEnv
+    pkgs.nix  # Use a stable release of Nix for testing regardless of system install
+  ];
 }

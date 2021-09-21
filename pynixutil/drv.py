@@ -80,6 +80,8 @@ def drvparse(drv_path: str) -> Derivation:
             return node.value
         elif isinstance(node, ast.Tuple):
             return tuple(parse_node(n) for n in node.elts)
+        elif isinstance(node, (ast.Str, ast.Bytes, ast.Num)):  # < Python3.8 compat
+            return node.value
         else:
             raise ValueError(node)
 

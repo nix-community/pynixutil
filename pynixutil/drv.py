@@ -80,10 +80,12 @@ def drvparse(drv_path: str) -> Derivation:
             return node.value
         elif isinstance(node, ast.Tuple):
             return tuple(parse_node(n) for n in node.elts)
-        elif isinstance(node, (ast.Str, ast.Bytes, ast.Num)):  # < Python3.8 compat
-            return node.value
-        else:
-            raise ValueError(node)
+        elif sys.version_info.minor < 8:  # < Python3.8 compat
+            if isinstance(node, (ast.Str, ast.Bytes)):
+                return node.s
+            elif isinstance(node, ast.Num):
+                return node.n
+        raise ValueError(node)
 
     drv = Derivation()
     for field, node in zip(Derivation.__dataclass_fields__.keys(), parsed.body[0].value.args):  # type: ignore

@@ -82,3 +82,15 @@ Derivation(
 )
 ```
 This mostly matches the data returned by `nix show-derivation`, but with more pythonic attribute names.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE)
+file for details.
+
+## About the project
+The developmentent of Trustix (which Pynixutil is a part of) has been sponsored by [Tweag I/O](https://tweag.io/) and funded by the [NLNet foundation](https://nlnet.nl/project/Trustix) and the European Commission’s [Next Generation Internet programme](https://www.ngi.eu/funded_solution/trustix-nix/) through the NGI Zero PET (privacy and trust enhancing technologies) fund.
+
+![NGI0 logo](./.assets/NGI0_tag.png)
+![NLNet banner](./.assets/nlnet-banner.png)
+![Tweag logo](./.assets/tweag.png)

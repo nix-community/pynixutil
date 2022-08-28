@@ -2,7 +2,7 @@ let
   pkgs = import <nixpkgs> { };
   inherit (pkgs) poetry2nix;
 
-  python = pkgs.python39;
+  python = pkgs.python3;
 
   pythonEnv = poetry2nix.mkPoetryEnv {
     projectDir = ./.;

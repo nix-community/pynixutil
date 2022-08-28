@@ -2,9 +2,9 @@
 name = "pynixutil"
 version = "0.5.0"
 description = "Utility functions for working with Nix in Python"
-authors = ["adisbladis <adam.hose@tweag.io>"]
+authors = ["adisbladis <adisbladis@gmail.com>"]
 license = "MIT"
-homepage = "https://github.com/tweag/pynixutil"
+homepage = "https://github.com/nix-community/pynixutil"
 
 [tool.poetry.dependencies]
 python = "^3.8"

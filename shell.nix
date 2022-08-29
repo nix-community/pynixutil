@@ -15,6 +15,6 @@ pkgs.mkShell {
     python
     (pkgs.poetry.override { inherit python; })
     pythonEnv
-    pkgs.nix  # Use a stable release of Nix for testing regardless of system install
+    pkgs.nix_2_3  # Use a stable release of Nix for testing regardless of system install
   ];
 }
